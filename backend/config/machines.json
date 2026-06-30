@@ -1,0 +1,19 @@
+{
+  "machines": [
+    { "id": "W1", "type": "washer", "label": "Washer 1" },
+    { "id": "W2", "type": "washer", "label": "Washer 2" },
+    { "id": "W3", "type": "washer", "label": "Washer 3" },
+    { "id": "W4", "type": "washer", "label": "Washer 4" },
+    { "id": "W5", "type": "washer", "label": "Washer 5" },
+    { "id": "W6", "type": "washer", "label": "Washer 6" },
+    { "id": "W7", "type": "washer", "label": "Washer 7" },
+    { "id": "W8", "type": "washer", "label": "Washer 8" },
+    { "id": "D1", "type": "dryer", "label": "Dryer 1" },
+    { "id": "D2", "type": "dryer", "label": "Dryer 2" },
+    { "id": "D3", "type": "dryer", "label": "Dryer 3" },
+    { "id": "D4", "type": "dryer", "label": "Dryer 4" },
+    { "id": "D5", "type": "dryer", "label": "Dryer 5" },
+    { "id": "D6", "type": "dryer", "label": "Dryer 6" }
+  ],
+  "flagThresholdMinutes": 30
+}
