@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sm = require('../state/stateManager');
+const { requireAdminAuth } = require('../middleware/adminAuth');
 
 // GET /api/machines
 router.get('/', (req, res) => {
@@ -39,7 +40,7 @@ router.post('/simulate/randomize', (req, res) => {
 });
 
 // GET /api/machines/admin/flagged
-router.get('/admin/flagged', (req, res) => {
+router.get('/admin/flagged', requireAdminAuth, (req, res) => {
   res.json(sm.getFlaggedSessions());
 });
 
