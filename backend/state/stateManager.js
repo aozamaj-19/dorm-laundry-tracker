@@ -173,6 +173,11 @@ function getFlaggedSessions() {
   return { ...flaggedSessions };
 }
 
+// Full machine state including PINs, for admin use only
+function getFullState() {
+  return Object.values(state).map((m) => ({ ...m }));
+}
+
 initState();
 
 module.exports = {
@@ -184,4 +189,5 @@ module.exports = {
   randomizeState,
   tick,
   getFlaggedSessions,
+  getFullState,
 };
