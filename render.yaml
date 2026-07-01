@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: dorm-laundry-tracker-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
