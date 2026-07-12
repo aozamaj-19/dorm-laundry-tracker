@@ -6,7 +6,10 @@ const machinesRouter = require('./routes/machines');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// credentials: true + reflected origin so the browser will send/prompt for
+// Basic Auth on cross-origin admin requests (frontend and backend are on
+// different domains in production)
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
 app.use('/api/machines', machinesRouter);

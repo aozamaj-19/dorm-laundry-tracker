@@ -1,5 +1,6 @@
 const { machines: machineConfig, flagThresholdMinutes } = require('../config/machines.json');
 const persist = require('./persist');
+const usageLog = require('./usageLog');
 
 const STATUSES = {
   AVAILABLE: 'available',
@@ -115,7 +116,7 @@ function startLoad(machineId, pin, cycleDurationMinutes) {
   };
 
   persist.save(state, flaggedSessions);
-  return { success: true, machine: publicView(state[machineId]) };
+  return { success: true, pin, machine: publicView(state[machineId]) };
 }
 
 function collectLoad(machineId, pin) {
@@ -144,6 +145,14 @@ function resetMachine(machineId) {
   };
 }
 
+function adminResetMachine(machineId) {
+  const machine = state[machineId];
+  if (!machine) return { error: 'Machine not found' };
+  resetMachine(machineId);
+  persist.save(state, flaggedSessions);
+  return { success: true, machine: publicView(state[machineId]) };
+}
+
 // Called on an interval to advance machine states
 function tick() {
   const now = Date.now();
@@ -166,7 +175,21 @@ function tick() {
       }
     }
   });
+
+  const busyCount = Object.values(state).filter((m) => m.status !== STATUSES.AVAILABLE).length;
+  usageLog.recordSnapshot(busyCount);
+
   persist.save(state, flaggedSessions);
+}
+
+// 7x24 grid (day x hour) of average machines-in-use, for the peak-hours heatmap
+function getUsageHeatmap() {
+  return { totalMachines: machineConfig.length, grid: usageLog.getHeatmap() };
+}
+
+// Quietest upcoming hours based on historical utilization
+function getBestTimes(count = 3) {
+  return usageLog.getQuietestUpcomingHours(count);
 }
 
 function getFlaggedSessions() {
@@ -190,4 +213,7 @@ module.exports = {
   tick,
   getFlaggedSessions,
   getFullState,
+  adminResetMachine,
+  getUsageHeatmap,
+  getBestTimes,
 };

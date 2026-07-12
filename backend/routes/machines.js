@@ -15,6 +15,16 @@ router.get('/:id', (req, res) => {
   res.json(machine);
 });
 
+// GET /api/machines/usage/heatmap — historical utilization grid (day x hour)
+router.get('/usage/heatmap', (req, res) => {
+  res.json(sm.getUsageHeatmap());
+});
+
+// GET /api/machines/usage/best-times — quietest upcoming hours based on history
+router.get('/usage/best-times', (req, res) => {
+  res.json({ times: sm.getBestTimes(3) });
+});
+
 // POST /api/machines/:id/start
 // Body: { pin: string, cycleDurationMinutes: number }
 router.post('/:id/start', (req, res) => {
@@ -37,6 +47,13 @@ router.post('/:id/collect', (req, res) => {
 router.post('/simulate/randomize', (req, res) => {
   sm.randomizeState();
   res.json({ success: true, machines: sm.getAllMachines() });
+});
+
+// POST /api/machines/:id/reset (admin only — clears PIN/timer, back to available)
+router.post('/:id/reset', requireAdminAuth, (req, res) => {
+  const result = sm.adminResetMachine(req.params.id);
+  if (result.error) return res.status(404).json(result);
+  res.json(result);
 });
 
 // GET /api/machines/admin/flagged

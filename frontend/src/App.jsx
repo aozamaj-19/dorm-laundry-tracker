@@ -1,14 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import MachineGrid from './components/MachineGrid';
-import { StartModal, CollectModal } from './components/Modal';
+import AdminPanel from './components/AdminPanel';
+import BestTimes from './components/BestTimes';
+import Heatmap from './components/Heatmap';
+import { StartModal, CollectModal, PinConfirmModal } from './components/Modal';
 import { getMachines, startLoad, collectLoad, randomizeState } from './api';
 import './index.css';
 
 export default function App() {
   const [machines, setMachines] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [pinConfirm, setPinConfirm] = useState(null);
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   const fetchMachines = useCallback(async () => {
     try {
@@ -33,8 +38,10 @@ export default function App() {
   }
 
   async function handleStart(id, pin, mins) {
-    await startLoad(id, pin, mins);
+    const machine = selected.machine;
+    const result = await startLoad(id, pin, mins);
     setSelected(null);
+    setPinConfirm({ machine, pin: result.pin });
     fetchMachines();
   }
 
@@ -75,15 +82,21 @@ export default function App() {
             <button className="btn btn--primary btn--sm" onClick={fetchMachines}>
               Refresh
             </button>
+            <button className="btn btn--ghost btn--sm" onClick={() => setShowAdmin((v) => !v)}>
+              {showAdmin ? 'Hide Admin' : 'Admin'}
+            </button>
           </div>
         </div>
       </header>
 
       <main className="main">
         {error && <div className="banner banner--error">{error}</div>}
+        <BestTimes />
         {machines.length > 0 && (
           <MachineGrid machines={machines} onAction={handleCardClick} />
         )}
+        <Heatmap />
+        {showAdmin && <AdminPanel />}
       </main>
 
       {selected?.mode === 'start' && (
@@ -98,6 +111,13 @@ export default function App() {
           machine={selected.machine}
           onConfirm={handleCollect}
           onClose={() => setSelected(null)}
+        />
+      )}
+      {pinConfirm && (
+        <PinConfirmModal
+          machine={pinConfirm.machine}
+          pin={pinConfirm.pin}
+          onClose={() => setPinConfirm(null)}
         />
       )}
     </div>

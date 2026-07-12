@@ -21,6 +21,7 @@ lerna-debug.log*
 
 # Runtime persisted state
 backend/state/state.json
+backend/state/usage-log.json
 
 # Editor/OS
 .vscode/*
