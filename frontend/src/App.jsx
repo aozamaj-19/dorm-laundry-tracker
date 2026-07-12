@@ -27,7 +27,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    fetchMachines();
+    async function initialLoad() {
+      const data = await getMachines().catch(() => null);
+      if (data && data.length > 0 && data.every((m) => m.status === 'available')) {
+        await randomizeState().catch(() => {});
+      }
+      fetchMachines();
+    }
+    initialLoad();
     const id = setInterval(fetchMachines, 10_000);
     return () => clearInterval(id);
   }, [fetchMachines]);
@@ -51,11 +58,6 @@ export default function App() {
     fetchMachines();
   }
 
-  async function handleRandomize() {
-    await randomizeState();
-    fetchMachines();
-  }
-
   const available = machines.filter((m) => m.status === 'available').length;
 
   return (
@@ -76,9 +78,6 @@ export default function App() {
                 Updated {lastUpdated.toLocaleTimeString()}
               </span>
             )}
-            <button className="btn btn--ghost btn--sm" onClick={handleRandomize}>
-              Simulate
-            </button>
             <button className="btn btn--primary btn--sm" onClick={fetchMachines}>
               Refresh
             </button>
