@@ -12,8 +12,8 @@ function load() {
   }
 }
 
-function save(state, flaggedSessions) {
-  fs.writeFileSync(FILE, JSON.stringify({ state, flaggedSessions }, null, 2), 'utf8');
+function save(state) {
+  fs.writeFileSync(FILE, JSON.stringify({ state }, null, 2), 'utf8');
 }
 
 module.exports = { load, save };

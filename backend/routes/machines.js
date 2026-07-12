@@ -56,11 +56,6 @@ router.post('/:id/reset', requireAdminAuth, (req, res) => {
   res.json(result);
 });
 
-// GET /api/machines/admin/flagged
-router.get('/admin/flagged', requireAdminAuth, (req, res) => {
-  res.json(sm.getFlaggedSessions());
-});
-
 // GET /api/machines/admin/state (full machine state including PINs)
 router.get('/admin/state', requireAdminAuth, (req, res) => {
   res.json(sm.getFullState());

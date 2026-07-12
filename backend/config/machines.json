@@ -14,6 +14,5 @@
     { "id": "D4", "type": "dryer", "label": "Dryer 4" },
     { "id": "D5", "type": "dryer", "label": "Dryer 5" },
     { "id": "D6", "type": "dryer", "label": "Dryer 6" }
-  ],
-  "flagThresholdMinutes": 30
+  ]
 }

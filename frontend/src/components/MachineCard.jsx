@@ -9,7 +9,7 @@ const STATUS_LABEL = {
 export default function MachineCard({ machine, onAction }) {
   const remaining = useCountdown(machine.status === 'running' ? machine.endTime : null);
 
-  const statusClass = `card card--${machine.status}${machine.flagged ? ' card--flagged' : ''}`;
+  const statusClass = `card card--${machine.status}`;
 
   return (
     <button className={statusClass} onClick={() => onAction(machine)}>
@@ -19,7 +19,6 @@ export default function MachineCard({ machine, onAction }) {
       {machine.status === 'running' && remaining !== null && (
         <span className="card__timer">{formatMs(remaining)} left</span>
       )}
-      {machine.flagged && <span className="card__flag">Flagged</span>}
     </button>
   );
 }

@@ -104,7 +104,6 @@ body { min-height: 100svh; }
 .card--available { background: var(--green-bg); border-color: var(--green-border); }
 .card--running   { background: var(--yellow-bg); border-color: var(--yellow-border); }
 .card--unavailable { background: var(--red-bg); border-color: var(--red-border); }
-.card--flagged { outline: 2px solid var(--red); }
 
 .card__icon  { font-size: 28px; }
 .card__label { font-size: 13px; font-weight: 600; color: var(--text); }
@@ -118,7 +117,6 @@ body { min-height: 100svh; }
 .card--unavailable .card__status { color: var(--red); }
 
 .card__timer { font-size: 12px; font-weight: 700; color: var(--yellow); font-variant-numeric: tabular-nums; }
-.card__flag  { font-size: 10px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.05em; }
 
 /* ── Admin Panel ── */
 .admin-panel { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--border); }

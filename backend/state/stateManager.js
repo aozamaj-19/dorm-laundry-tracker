@@ -1,4 +1,4 @@
-const { machines: machineConfig, flagThresholdMinutes } = require('../config/machines.json');
+const { machines: machineConfig } = require('../config/machines.json');
 const persist = require('./persist');
 const usageLog = require('./usageLog');
 
@@ -10,8 +10,6 @@ const STATUSES = {
 
 // In-memory store: machineId -> machine state object
 const state = {};
-// flagged PINs: pin -> { machineId, flaggedAt }
-const flaggedSessions = {};
 
 function initState() {
   const saved = persist.load();
@@ -26,12 +24,8 @@ function initState() {
       startTime: null,
       cycleDurationMs: null,
       endTime: null,
-      flagged: false,
     };
   });
-  if (saved?.flaggedSessions) {
-    Object.assign(flaggedSessions, saved.flaggedSessions);
-  }
 }
 
 function randomizeState() {
@@ -50,7 +44,6 @@ function randomizeState() {
         startTime: Date.now() - 5000,
         cycleDurationMs: remainingMs + 5000,
         endTime: Date.now() + remainingMs,
-        flagged: false,
       };
     } else {
       // 25% unavailable (done, not collected)
@@ -61,11 +54,10 @@ function randomizeState() {
         startTime: Date.now() - 60 * 60 * 1000,
         cycleDurationMs: 30 * 60 * 1000,
         endTime: Date.now() - 30 * 60 * 1000,
-        flagged: false,
       };
     }
   });
-  persist.save(state, flaggedSessions);
+  persist.save(state);
 }
 
 function getAllMachines() {
@@ -91,7 +83,6 @@ function publicView(machine) {
     status: machine.status,
     remainingMs,
     endTime: machine.endTime,
-    flagged: machine.flagged,
   };
 }
 
@@ -112,10 +103,9 @@ function startLoad(machineId, pin, cycleDurationMinutes) {
     startTime: now,
     cycleDurationMs,
     endTime: now + cycleDurationMs,
-    flagged: false,
   };
 
-  persist.save(state, flaggedSessions);
+  persist.save(state);
   return { success: true, pin, machine: publicView(state[machineId]) };
 }
 
@@ -125,9 +115,8 @@ function collectLoad(machineId, pin) {
   if (machine.status === STATUSES.AVAILABLE) return { error: 'Machine is already available' };
   if (machine.pin !== pin) return { error: 'Incorrect PIN' };
 
-  // Clear any flag since the user collected in time (or late — we still allow collection)
   resetMachine(machineId);
-  persist.save(state, flaggedSessions);
+  persist.save(state);
   return { success: true, machine: publicView(state[machineId]) };
 }
 
@@ -141,7 +130,6 @@ function resetMachine(machineId) {
     startTime: null,
     cycleDurationMs: null,
     endTime: null,
-    flagged: false,
   };
 }
 
@@ -149,37 +137,24 @@ function adminResetMachine(machineId) {
   const machine = state[machineId];
   if (!machine) return { error: 'Machine not found' };
   resetMachine(machineId);
-  persist.save(state, flaggedSessions);
+  persist.save(state);
   return { success: true, machine: publicView(state[machineId]) };
 }
 
 // Called on an interval to advance machine states
 function tick() {
   const now = Date.now();
-  const flagThresholdMs = flagThresholdMinutes * 60 * 1000;
 
   Object.values(state).forEach((machine) => {
     if (machine.status === STATUSES.RUNNING && machine.endTime && now >= machine.endTime) {
       state[machine.id].status = STATUSES.UNAVAILABLE;
-    }
-
-    if (
-      machine.status === STATUSES.UNAVAILABLE &&
-      machine.endTime &&
-      now >= machine.endTime + flagThresholdMs &&
-      !machine.flagged
-    ) {
-      state[machine.id].flagged = true;
-      if (machine.pin) {
-        flaggedSessions[machine.pin] = { machineId: machine.id, flaggedAt: now };
-      }
     }
   });
 
   const busyCount = Object.values(state).filter((m) => m.status !== STATUSES.AVAILABLE).length;
   usageLog.recordSnapshot(busyCount);
 
-  persist.save(state, flaggedSessions);
+  persist.save(state);
 }
 
 // 7x24 grid (day x hour) of average machines-in-use, for the peak-hours heatmap
@@ -190,10 +165,6 @@ function getUsageHeatmap() {
 // Quietest upcoming hours based on historical utilization
 function getBestTimes(count = 3) {
   return usageLog.getQuietestUpcomingHours(count);
-}
-
-function getFlaggedSessions() {
-  return { ...flaggedSessions };
 }
 
 // Full machine state including PINs, for admin use only
@@ -211,7 +182,6 @@ module.exports = {
   collectLoad,
   randomizeState,
   tick,
-  getFlaggedSessions,
   getFullState,
   adminResetMachine,
   getUsageHeatmap,

@@ -42,7 +42,6 @@ export default function AdminPanel() {
             <span className="admin-row__label">{m.label}</span>
             <span className="admin-row__status">{STATUS_LABEL[m.status]}</span>
             <span className="admin-row__pin">{m.pin ? `PIN ${m.pin}` : '—'}</span>
-            {m.flagged && <span className="card__flag">Flagged</span>}
             <button
               type="button"
               className="btn btn--ghost btn--sm"
